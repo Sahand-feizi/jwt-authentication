@@ -7,16 +7,20 @@ use App\Http\Controllers\Api\ApiController as ApiApiController;
 use App\Http\Requests\V1\CheckOtpRequest;
 use App\Http\Requests\V1\CompleteProfileRequest;
 use App\Http\Requests\V1\GetOtpRequest;
+use App\Models\RefreshToken;
 use App\Models\User;
-use App\Services\OtpService;
+use App\Services\AuthService\OtpService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
-use App\Services\AuthenticationService;
-use App\Services\CookieService;
+use App\Services\AuthService\AuthenticationService;
+use App\Services\AuthService\CookieService;
+use App\Services\AuthService\RefreshTokenService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AuthController extends ApiApiController
 {
-    public function __construct(protected OtpService $otpService, protected AuthenticationService $authService, protected CookieService $cookieService)
+    public function __construct(protected RefreshTokenService $refreshTokenService, protected OtpService $otpService, protected AuthenticationService $authService, protected CookieService $cookieService)
     {
         //
     }
@@ -64,13 +68,25 @@ class AuthController extends ApiApiController
         );
     }
 
-    public function CompleteProfile(CompleteProfileRequest $request, CompleteProfile $action)
+    public function completeProfile(CompleteProfileRequest $request, CompleteProfile $action)
     {
         $user = Auth::user();
 
         $action->handel($user, array_merge($request->validated(), ['active' => true]));
 
         return $this->ok("Profile completed successfully");
+    }
+
+    public function refresh(Request $request)
+    {
+        $refreshToken = $request->cookie("refresh_token");
+
+        $tokens = $this->authService->refresh($refreshToken);
+
+        return $this->withCookies('The access token updated successfuly', [
+            $this->cookieService->accessToken($tokens['accessToken']),
+            $this->cookieService->refreshToken($tokens['refreshToken'])
+        ]);
     }
 
     public function logout()

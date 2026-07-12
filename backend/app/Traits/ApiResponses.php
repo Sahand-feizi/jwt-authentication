@@ -22,7 +22,7 @@ trait ApiResponses
         ], $statusCode);
     }
 
-    protected function error(array $errors, int $statusCode, array $data = [])
+    protected function error(mixed $errors, int $statusCode, array $data = [])
     {
         if (is_string($errors)) {
             return response()->json([
