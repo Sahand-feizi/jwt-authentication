@@ -32,9 +32,9 @@ trait ApiResponses
             ], $statusCode);
         }
 
-        return [
+        return response()->json([
             'errors' => $errors
-        ];
+        ], $statusCode);
     }
 
     protected function withCookies(string $message, array $cookies, array $data = [], $statusCode = 200)
