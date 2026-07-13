@@ -7,7 +7,7 @@ Route::prefix('auth')->group(function() {
     Route::post('/getOtp', [AuthController::class, 'getOtp']);
     Route::post('/checkOtp', [AuthController::class, 'checkOtp']);
 
-    Route::post('/complete_profile', [AuthController::class, 'completeProfile'])->middleware('auth:api');
+    Route::post('/completeProfile', [AuthController::class, 'completeProfile'])->middleware('auth:api');
 
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
     

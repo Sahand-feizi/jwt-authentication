@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Services\AuthService\RefreshTokenService;
 use App\Traits\ApiResponses;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 
 class AuthenticationService
 {
@@ -33,10 +35,10 @@ class AuthenticationService
         ];
     }
 
-    public function refresh(string $refreshToken)
+    public function refresh(mixed $refreshToken)
     {
         if (!$refreshToken) {
-            return $this->error('you are not authenticated', 401);
+            return throw new AuthenticationException();
         }
 
         $hashedToken = hash('sha256', $refreshToken);
@@ -45,7 +47,7 @@ class AuthenticationService
             ->first();
 
         if (!$dbToken) {
-            return $this->error('Your Token has been expired or It is not valid', 401);
+            return throw new AuthorizationException('Your Token has been expired or It is not valid');
         }
 
         $user = User::findOrFail($dbToken->user_id);
@@ -53,8 +55,8 @@ class AuthenticationService
         $newAccessToken = Auth::login($user);
 
         return [
-            'refreshToken' => $refreshToken,
-            'accessToken' => $newAccessToken
+            $refreshToken,
+            $newAccessToken
         ];
     }
 }

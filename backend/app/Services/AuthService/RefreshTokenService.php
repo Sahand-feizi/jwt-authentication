@@ -27,7 +27,7 @@ class RefreshTokenService
         $refreshTokenString = Str::random(64);
 
         $refreshToken->update([
-            'token ' => hash('sha256', $refreshTokenString),
+            'token' => hash('sha256', $refreshTokenString),
             'expires_at' => Date::now()->addWeeks(2)
         ]);
         

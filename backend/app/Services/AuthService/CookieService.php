@@ -3,15 +3,27 @@
 namespace App\Services\AuthService;
 
 class CookieService {
+    protected function cookieOptions(): array
+    {
+        $secure = app()->environment('production');
+        $sameSite = $secure ? 'none' : 'lax';
+
+        return [
+            '/',
+            null,
+            $secure,
+            true,
+            false,
+            $sameSite,
+        ];
+    }
+
     public function accessToken(string $token){
         return cookie(
             'access_token',
             $token,
             60,
-            '/',
-            null,
-            true,
-            true
+            ...$this->cookieOptions()
         );
     }
 
@@ -20,10 +32,7 @@ class CookieService {
             'refresh_token',
             $token,
             14 * 24 * 60,
-            '/',
-            null,
-            true,
-            true
+            ...$this->cookieOptions()
         );
     }
 

@@ -20,8 +20,12 @@ use Illuminate\Support\Str;
 
 class AuthController extends ApiApiController
 {
-    public function __construct(protected RefreshTokenService $refreshTokenService, protected OtpService $otpService, protected AuthenticationService $authService, protected CookieService $cookieService)
-    {
+    public function __construct(
+        protected RefreshTokenService $refreshTokenService,
+        protected OtpService $otpService,
+        protected AuthenticationService $authService,
+        protected CookieService $cookieService
+    ) {
         //
     }
 
@@ -62,16 +66,15 @@ class AuthController extends ApiApiController
             }
         }
 
-        return $this->ok(
+        return $this->error(
             "The code is wrong or has been expired",
-            ['status' => 401]
+            401
         );
     }
 
     public function completeProfile(CompleteProfileRequest $request, CompleteProfile $action)
     {
         $user = Auth::user();
-
         $action->handel($user, array_merge($request->validated(), ['active' => true]));
 
         return $this->ok("Profile completed successfully");
@@ -80,12 +83,11 @@ class AuthController extends ApiApiController
     public function refresh(Request $request)
     {
         $refreshToken = $request->cookie("refresh_token");
-
-        $tokens = $this->authService->refresh($refreshToken);
+        [$refreshToken, $accessToken] = $this->authService->refresh($refreshToken);
 
         return $this->withCookies('The access token updated successfuly', [
-            $this->cookieService->accessToken($tokens['accessToken']),
-            $this->cookieService->refreshToken($tokens['refreshToken'])
+            $this->cookieService->accessToken($accessToken),
+            $this->cookieService->refreshToken($refreshToken)
         ]);
     }
 
